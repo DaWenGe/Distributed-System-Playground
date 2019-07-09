@@ -13,7 +13,7 @@ public:
 };
 
 template <typename T>
-class IteratorImpl : public IIterator {
+class IteratorImpl : public IIterator<T> {
 private:
     int mCurIndex = 0;
     vector<T> mData;
@@ -31,13 +31,13 @@ public:
 };
 
 template <typename T>
-class PeekingIterator : public IIterator {
+class PeekingIterator : public IIterator<T> {
 private:
     T mPeekedElement;
     bool mHasPeeked = false;
-    IIterator* mBaseIter;
+    IIterator<T> * mBaseIter;
 public:
-    PeekingIterator(const IIterator* iter) : mBaseIter(iter) {}
+    PeekingIterator(IIterator<T> * iter) : mBaseIter(iter) {}
     ~PeekingIterator() {}
     T next() override {
         if (!mHasPeeked)
@@ -58,3 +58,20 @@ public:
         return mHasPeeked || mBaseIter->hasNext();
     }
 };
+
+int main(int argc, char const *argv[])
+{
+    vector<int> data {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    auto * peekingIter = new PeekingIterator<int>(new IteratorImpl<int>(data));
+    while (true && peekingIter->hasNext()) {
+        auto value = peekingIter->peek();
+        std::cout << "Peeked value: " << value;
+        std::cout << " Move on to the next value." << std::endl;
+        value = peekingIter->next();
+        if (rand() % 3 == 0) {
+            value = peekingIter->peek();
+            std::cout << "LOL! Peeked again: " << value << std::endl;
+        }
+    }
+    return 0;
+}
